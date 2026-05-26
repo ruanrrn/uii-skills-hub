@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>VitalLens — 心率与呼吸率单次测量</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+           max-width: 720px; margin: 1.5em auto; padding: 0 1em; color: #222; }
+    h1 { font-size: 1.4em; margin: 0 0 0.3em; }
+    .lead { color: #555; margin-top: 0; font-size: 0.95em; }
+    #preview { width: 100%; max-width: 640px; aspect-ratio: 4/3;
+               background: #111; border-radius: 8px; display: block; margin: 1em 0; }
+    #status { font-size: 1em; margin: 0.8em 0; min-height: 1.4em; color: #444; }
+    .controls { display: flex; gap: 0.6em; flex-wrap: wrap; margin: 0.5em 0; }
+    button { font-size: 1em; padding: 0.55em 1.1em; cursor: pointer;
+             border: none; border-radius: 4px; font-family: inherit; }
+    .primary { background: #2080ff; color: white; }
+    .primary:hover:not(:disabled) { background: #1668d8; }
+    .secondary { background: #ececec; color: #222; }
+    .secondary:hover:not(:disabled) { background: #dcdcdc; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #results { background: #f7f7f8; border-radius: 8px; padding: 0.8em 1em;
+               margin-top: 1em; display: none; }
+    #results h2 { margin: 0 0 0.5em; font-size: 1.15em; }
+    .metric { display: flex; justify-content: space-between; padding: 0.35em 0;
+              border-bottom: 1px solid #e0e0e0; }
+    .metric:last-child { border-bottom: 0; }
+    .metric .v { font-variant-numeric: tabular-nums; }
+    .lo { color: #c66; }
+    .disclaimer { color: #888; font-size: 0.85em; margin-top: 1.5em;
+                  padding-top: 0.8em; border-top: 1px solid #eee; }
+    .key-prompt { background: #fff8dc; padding: 0.6em 1em; border-radius: 6px;
+                  margin: 0.5em 0; font-size: 0.9em; display: none; }
+    .key-prompt input { width: 70%; padding: 0.3em; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>心率与呼吸率单次测量</h1>
+  <p class="lead">请将面部对准摄像头中央，保持不动；按"开始测量"会进行 3 秒倒计时，然后采集 ≥350 帧（约 12–20 秒）。完成后页面会自动下载 <code>vitallens_result.json</code>。</p>
+
+  <div id="keyPrompt" class="key-prompt">
+    页面未通过启动脚本打开，未自动注入 API key。请粘贴你的 VitalLens API key
+    （免费申请：<a href="https://www.rouast.com/api" target="_blank">https://www.rouast.com/api</a>）：
+    <br><input id="apiKeyInput" placeholder="VITALLENS_API_KEY..." />
+    <button id="setKeyBtn" class="secondary">使用此 key</button>
+  </div>
+
+  <video id="preview" autoplay muted playsinline></video>
+  <div id="status">点击下方按钮开始</div>
+  <div class="controls">
+    <button id="startBtn" class="primary" disabled>加载中…</button>
+    <button id="downloadBtn" class="secondary" disabled>下载结果 JSON</button>
+  </div>
+
+  <div id="results">
+    <h2>测量结果</h2>
+    <div id="metricsBox"></div>
+  </div>
+
+  <p class="disclaimer">⚠ 仅供研究用途，不构成医疗建议。Research use only — not for medical decisions.</p>
+
+  <!-- WebM container patcher: MediaRecorder omits the EBML Duration and
+       DefaultDuration elements, which makes ffmpeg.wasm (used internally by
+       vitallens.js) reject the blob. We splice them in before upload. -->
+  <script src="./webm-duration-fix.js"></script>
+
+  <!-- Local SDK: vitallens-shim.js imports vitallens.browser.js and assigns
+       VitalLens to window, then fires 'vitallens-ready'. -->
+  <script type="module" src="./vitallens-shim.js"></script>
+
+  <script>
+    // -------- Config --------
+    // API key comes from URL hash (#key=ABC). The launcher injects it there
+    // because hashes don't appear in server access logs or the Referer header.
+    let API_KEY = new URLSearchParams(location.hash.slice(1)).get('key') || '';
+    const TARGET_FRAMES = 350;              // collect at least this many camera frames
+    const MAX_WAIT_MS = 60000;              // safety cap: stop after this much wall time anyway
+    const CONFIDENCE_WARN = 0.7;
+    const AUTO_START = true;                // start measurement automatically when ready
+    const AUTO_CLOSE_DELAY_MS = 2500;       // ms to show result before window.close()
+
+    // -------- DOM --------
+    const preview = document.getElementById('preview');
+    const statusEl = document.getElementById('status');
+    const startBtn = document.getElementById('startBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resultsBox = document.getElementById('results');
+    const metricsBox = document.getElementById('metricsBox');
+    const keyPrompt = document.getElementById('keyPrompt');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const setKeyBtn = document.getElementById('setKeyBtn');
+
+    let result = null, vl = null, stream = null;
+
+    // Wait until the shim has assigned window.VitalLens. Resolves to the class.
+    function waitForVitalLens(timeoutMs = 20000) {
+      return new Promise((resolve, reject) => {
+        if (window.VitalLens) return resolve(window.VitalLens);
+        const ready = () => { window.removeEventListener('vitallens-ready', ready); resolve(window.VitalLens); };
+        window.addEventListener('vitallens-ready', ready);
+        setTimeout(() => {
+          if (!window.VitalLens) reject(new Error('SDK 未在 ' + timeoutMs + 'ms 内加载完成，请检查 scripts/ 目录文件是否齐全'));
+        }, timeoutMs);
+      });
+    }
+
+    async function openCamera() {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30 } },
+        audio: false,
+      });
+      preview.srcObject = stream;
+      await preview.play();
+    }
+
+    // Report errors back to the launcher (if any). Returns silently if no server
+    // is listening — the page also works when opened directly.
+    function reportError(err) {
+      const body = (err && err.stack) || (err && err.message) || String(err);
+      return fetch('/save?name=error.txt', { method: 'POST', body }).catch(() => {});
+    }
+
+    async function measure() {
+      startBtn.disabled = true;
+      downloadBtn.disabled = true;
+      resultsBox.style.display = 'none';
+      result = null;
+      try {
+        if (!vl) {
+          statusEl.textContent = '等待 VitalLens SDK 加载…';
+          const VitalLensCls = await waitForVitalLens();
+          statusEl.textContent = '初始化 VitalLens 实例…';
+          vl = new VitalLensCls({ method: 'vitallens', apiKey: API_KEY });
+        }
+
+        if (!stream) {
+          statusEl.textContent = '打开摄像头…';
+          await openCamera();
+        }
+
+        for (let n = 3; n > 0; n--) {
+          statusEl.textContent = `准备开始：${n}`;
+          await new Promise(r => setTimeout(r, 1000));
+        }
+
+        // Record with MediaRecorder, then hand the blob to vl.processVideoFile().
+        // Force VP8 because the SDK uses ffmpeg.wasm internally and its VP9
+        // metadata parsing is unreliable. rVFC counts decoded frames so we can
+        // stop once we've collected >= TARGET_FRAMES.
+        const mime = ['video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm', 'video/mp4']
+          .find(m => MediaRecorder.isTypeSupported(m)) || '';
+        const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+        const chunks = [];
+        recorder.addEventListener('dataavailable', e => { if (e.data && e.data.size) chunks.push(e.data); });
+        const stopped = new Promise(r => recorder.addEventListener('stop', r));
+
+        let frameCount = 0;
+        const rvfcSupported = typeof preview.requestVideoFrameCallback === 'function';
+        if (rvfcSupported) {
+          const onFrame = () => { frameCount++; preview.requestVideoFrameCallback(onFrame); };
+          preview.requestVideoFrameCallback(onFrame);
+        }
+
+        const startedAt = performance.now();
+        recorder.start(200);  // 200ms chunks → steady dataavailable callbacks
+
+        while (true) {
+          const elapsed = performance.now() - startedAt;
+          const enoughFrames = rvfcSupported && frameCount >= TARGET_FRAMES;
+          const timedOut = elapsed >= MAX_WAIT_MS;
+          if (enoughFrames || timedOut) break;
+          const elapsedSec = (elapsed / 1000).toFixed(1);
+          statusEl.textContent = rvfcSupported
+            ? `录制中：保持不动，正常呼吸 —— 已 ${frameCount} 帧 / 目标 ${TARGET_FRAMES}（${elapsedSec}s）`
+            : `录制中（rVFC 不可用，按时间兜底）—— ${elapsedSec}s / ${(MAX_WAIT_MS/1000)}s`;
+          await new Promise(r => setTimeout(r, 250));
+        }
+
+        const captureMs = performance.now() - startedAt;
+        recorder.stop();
+        await stopped;
+        const rawBlob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
+
+        // Patch the WebM blob with TWO missing pieces of metadata that
+        // MediaRecorder omits and ffmpeg.wasm needs:
+        //   (1) Duration in Info section          → ffmpeg "Duration: HH:MM:SS.ms"
+        //   (2) DefaultDuration in Video TrackEntry → ffmpeg "NN fps"
+        // The SDK's parseFFmpegOutput requires both lines.
+        statusEl.textContent = '修正 WebM 容器元数据…';
+        const fpsValue = frameCount / (captureMs / 1000);
+        let fixedBlob;
+        try {
+          let b = await patchWebmDuration(rawBlob, captureMs);
+          b = await patchWebmDefaultDuration(b, fpsValue);
+          fixedBlob = b;
+        } catch (e) {
+          // Fall through with raw blob — processVideoFile will then surface
+          // the underlying ffmpeg error rather than swallowing it.
+          fixedBlob = rawBlob;
+        }
+        const file = new File([fixedBlob], 'capture.webm', { type: fixedBlob.type });
+
+        statusEl.textContent = '上传至 VitalLens API 分析中（约 10–30 秒）…';
+        const apiResult = await vl.processVideoFile(file);
+
+        apiResult.capture_meta = {
+          frames: frameCount,
+          elapsed_ms: Math.round(captureMs),
+          target_frames: TARGET_FRAMES,
+          mime: fixedBlob.type,
+          blob_size: fixedBlob.size,
+        };
+        result = apiResult;
+
+        // POST result to the local launcher. Browser auto-downloads can be
+        // blocked in --app mode, so the launcher uses this as the canonical
+        // output channel; fails silently when the page is opened standalone.
+        fetch('/save?name=result.json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(result, null, 2),
+        }).catch(() => {});
+
+        showResults(result);
+        downloadBtn.disabled = false;
+        triggerDownload(result);
+
+        statusEl.textContent = '测量完成。窗口将在几秒后自动关闭…';
+        setTimeout(() => {
+          try { window.close(); } catch (e) { /* ignored */ }
+          setTimeout(() => {
+            statusEl.textContent = '测量完成。可手动关闭此窗口。';
+          }, 800);
+        }, AUTO_CLOSE_DELAY_MS);
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = `错误：${(err && err.message) || err}`;
+        reportError(err);
+      } finally {
+        startBtn.disabled = false;
+        startBtn.textContent = '重新测量';
+      }
+    }
+
+    function getVital(r, name) {
+      return (r && r.vitals && r.vitals[name]) || (r && r[name]) ||
+             (r && r.results && r.results[0] && r.results[0].vitals && r.results[0].vitals[name]);
+    }
+
+    function showResults(r) {
+      statusEl.textContent = '测量完成。';
+      resultsBox.style.display = 'block';
+      const hr = getVital(r, 'heart_rate');
+      const rr = getVital(r, 'respiratory_rate');
+      const rows = [];
+      const fmt = (m, unit, label) => {
+        if (!m || typeof m.value !== 'number') return;
+        const c = (m.confidence != null) ? m.confidence : 0;
+        const lo = c < CONFIDENCE_WARN ? ' lo' : '';
+        rows.push(`<div class="metric"><b>${label}</b>` +
+          `<span class="v${lo}">${m.value.toFixed(1)} ${unit}  ` +
+          `(置信度 ${c.toFixed(2)}${c < CONFIDENCE_WARN ? ' ⚠ 偏低' : ''})</span></div>`);
+      };
+      fmt(hr, 'bpm', '心率 Heart Rate');
+      fmt(rr, 'rpm', '呼吸率 Respiratory Rate');
+      if (!rows.length) {
+        rows.push('<div class="metric">未在返回中找到心率/呼吸率字段，请查看 result.json 全文。</div>');
+      }
+      metricsBox.innerHTML = rows.join('');
+    }
+
+    function triggerDownload(r) {
+      const blob = new Blob([JSON.stringify(r, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'vitallens_result.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    downloadBtn.addEventListener('click', () => result && triggerDownload(result));
+    startBtn.addEventListener('click', measure);
+    setKeyBtn.addEventListener('click', () => {
+      const v = apiKeyInput.value.trim();
+      if (v) { API_KEY = v; keyPrompt.style.display = 'none'; checkReady(); }
+    });
+
+    function checkReady() {
+      if (!API_KEY) {
+        keyPrompt.style.display = 'block';
+        statusEl.textContent = '等待 API key…';
+        startBtn.textContent = '等待 API key';
+        startBtn.disabled = true;
+      } else {
+        keyPrompt.style.display = 'none';
+        startBtn.textContent = '开始测量';
+        startBtn.disabled = false;
+        if (AUTO_START) {
+          statusEl.textContent = '准备就绪，即将自动开始测量（将请求摄像头权限）…';
+          setTimeout(() => measure(), 600);
+        } else {
+          statusEl.textContent = '准备就绪。点击"开始测量"。';
+        }
+      }
+    }
+    checkReady();
+  </script>
+</body>
+</html>
