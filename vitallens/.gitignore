@@ -1,0 +1,8 @@
+# Per-run measurement output — never commit (contains face coords + vitals)
+result.json
+error.txt
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.swp
