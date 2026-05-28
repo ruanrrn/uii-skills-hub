@@ -35,8 +35,8 @@ const SKILLS = [
     quickstart: [
       '请帮我安装 vitallens-rppg 这个 skill：',
       '',
-      '源码：https://github.com/ruanrrn/uii-agent-hub/tree/main/vitallens',
-      '请把它放到本地 skill 目录（默认 ~/.claude/skills/vitallens/）。',
+      '源码：https://github.com/ruanrrn/uii-skills-hub/tree/main/vitallens',
+      '请把它放到本地 skill 目录。',
       '',
       '依赖（任一缺失先告诉我怎么补）：',
       '  • Node.js 18+',
@@ -44,8 +44,7 @@ const SKILLS = [
       '  • VITALLENS_API_KEY 环境变量（在 https://www.rouast.com/api 免费申请）',
       '  • 一个可用的摄像头',
       '',
-      '安装完成后跑一次 `node ~/.claude/skills/vitallens/scripts/launch.js`，',
-      '确认能正常启动浏览器并完成一次测量。',
+      '安装完成后，对 AI 助手说「我要测试呼吸心率」即可触发测量。',
     ].join('\n'),
   },
 ];
