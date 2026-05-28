@@ -1,191 +1,355 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>联影智能 Agent Hub</title>
-  <meta name="description" content="联影智能 Agent Hub — 把影像 AI 能力变成院内智能体可以直接调用的标准化外部服务。" />
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>联影智能 Agent Hub</title>
+    <meta
+      name="description"
+      content="联影智能 Agent Hub — 把影像 AI 能力变成院内智能体可以直接调用的标准化外部服务。"
+    />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet"
-  />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
 
-  <link rel="stylesheet" href="styles.css?v=7" />
-</head>
-<body>
-  <header class="site-header" id="siteHeader">
-    <div class="container header-inner">
-      <div class="header-left">
-        <a href="#" class="logo" aria-label="联影智能 Agent Hub">
-          <img src="assets/uii-logo.png" class="logo-img" alt="联影智能" />
-        </a>
-        <span class="header-divider" aria-hidden="true"></span>
-        <span class="header-brand">Agent Hub</span>
-      </div>
-
-      <a class="github-btn" href="https://github.com/ruanrrn/uii-agent-hub" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-          <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2.9-.3 2-.4 3-.4s2.1.1 3 .4c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z" />
-        </svg>
-        <span>GitHub</span>
-      </a>
-    </div>
-  </header>
-
-  <main>
-    <section class="skills-section" id="skills">
-      <div class="container">
-        <div class="section-head">
-          <h2 class="section-title-large" id="sectionTitle">Skills</h2>
-          <div class="section-toolbar">
-            <div class="search-wrap">
-              <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" />
-                <line x1="20" y1="20" x2="16.65" y2="16.65" stroke-linecap="round" />
-              </svg>
-              <input
-                type="search"
-                class="search-input"
-                id="search"
-                placeholder="搜索技能"
-                aria-label="搜索技能"
-              />
-            </div>
-            <button class="sort-dropdown" type="button" aria-label="排序">
-              <span>推荐</span>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <polyline points="6 9 12 15 18 9" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-            <div class="view-toggle" role="tablist" aria-label="视图切换">
-              <button class="view-btn active" data-view="grid" role="tab" aria-selected="true" aria-label="网格视图">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                  <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                  <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                  <rect x="14" y="14" width="7" height="7" rx="1.5" />
-                </svg>
-              </button>
-              <button class="view-btn" data-view="list" role="tab" aria-selected="false" aria-label="列表视图">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <line x1="3" y1="6" x2="21" y2="6" stroke-linecap="round" />
-                  <line x1="3" y1="12" x2="21" y2="12" stroke-linecap="round" />
-                  <line x1="3" y1="18" x2="21" y2="18" stroke-linecap="round" />
-                </svg>
-              </button>
-            </div>
-          </div>
+    <link rel="stylesheet" href="styles.css?v=7" />
+  </head>
+  <body>
+    <header class="site-header" id="siteHeader">
+      <div class="container header-inner">
+        <div class="header-left">
+          <a href="#" class="logo" aria-label="联影智能 Agent Hub">
+            <img src="assets/uii-logo.png" class="logo-img" alt="联影智能" />
+          </a>
+          <span class="header-divider" aria-hidden="true"></span>
+          <span class="header-brand">Agent Hub</span>
         </div>
 
-        <div class="skills-layout">
-          <aside class="sidebar" aria-label="类型筛选">
-            <div class="type-nav-label">类型</div>
-            <nav class="type-nav" data-filter="type" role="tablist" aria-label="按类型筛选">
-              <button class="type-nav-item active" data-value="skill" role="tab" aria-selected="true">
-                <span class="type-nav-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                    <path d="M14.7 6.3 17.4 9l2.3-2.3a2 2 0 0 0 0-2.8l-.6-.6a2 2 0 0 0-2.8 0Z" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M3 21 14.7 9.3l-2.7-2.7L3 18Z" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </span>
-                <span class="type-nav-text">Skill</span>
-                <span class="type-nav-count" data-count="skill">—</span>
-              </button>
-              <button class="type-nav-item" data-value="plugin" role="tab" aria-selected="false">
-                <span class="type-nav-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                    <path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" stroke-linecap="round" />
-                    <rect x="6" y="6" width="12" height="12" rx="2.5" />
-                  </svg>
-                </span>
-                <span class="type-nav-text">Plugin</span>
-                <span class="type-nav-count" data-count="plugin">—</span>
-              </button>
-            </nav>
-          </aside>
-
-          <div class="skills-main">
-            <p class="results-count" id="skillCount">加载中...</p>
-            <div class="skill-grid" id="skillGrid" aria-live="polite"></div>
-            <div class="empty-state" id="emptyState" hidden>
-              <div class="empty-emoji">🔭</div>
-              <p>没有匹配的技能</p>
-              <button class="btn-secondary" id="clearSearch">清除筛选</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="site-footer-cta">
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p class="footer-copy">© 2026 UII Agent Hub</p>
-      <div class="footer-links">
-        <a href="https://github.com/ruanrrn/uii-agent-hub" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://github.com/ruanrrn/uii-agent-hub/issues" target="_blank" rel="noopener noreferrer">Issues</a>
-      </div>
-    </div>
-  </footer>
-
-  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
-    <div class="modal" id="modal" role="document">
-      <header class="modal-header">
-        <div class="modal-title-group">
-          <div class="modal-icon" id="modalIcon" aria-hidden="true">❤️</div>
-          <div>
-            <h3 class="modal-title" id="modalTitle">—</h3>
-            <div class="modal-sub" id="modalSub">—</div>
-          </div>
-        </div>
-        <button class="modal-close" id="modalClose" aria-label="关闭">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <line x1="6" y1="6" x2="18" y2="18" stroke-linecap="round" />
-            <line x1="18" y1="6" x2="6" y2="18" stroke-linecap="round" />
+        <a
+          class="github-btn"
+          href="https://github.com/ruanrrn/uii-agent-hub"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2.9-.3 2-.4 3-.4s2.1.1 3 .4c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"
+            />
           </svg>
-        </button>
-      </header>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </header>
 
-      <div class="modal-body">
-        <section class="modal-section">
-          <p class="modal-desc" id="modalDesc">—</p>
-        </section>
-
-        <section class="modal-section">
-          <div class="modal-meta-grid" id="modalMetaGrid"></div>
-        </section>
-
-        <section class="modal-section">
-          <div class="modal-section-label">Quick Start</div>
-          <div class="install-card">
-            <div class="install-card-head">
-              <span class="install-card-intro">复制下面这段话，粘贴给任一能读懂自然语言、可执行本地脚本的 AI 助手</span>
-              <button class="copy-btn-light" id="modalCopyBtn" aria-label="复制安装指令">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <rect x="9" y="9" width="13" height="13" rx="2" />
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    <main>
+      <section class="skills-section" id="skills">
+        <div class="container">
+          <div class="section-head">
+            <h2 class="section-title-large" id="sectionTitle">Skills</h2>
+            <div class="section-toolbar">
+              <div class="search-wrap">
+                <svg
+                  class="search-icon"
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <line
+                    x1="20"
+                    y1="20"
+                    x2="16.65"
+                    y2="16.65"
+                    stroke-linecap="round"
+                  />
                 </svg>
-                <span class="copy-label">Copy</span>
+                <input
+                  type="search"
+                  class="search-input"
+                  id="search"
+                  placeholder="搜索技能"
+                  aria-label="搜索技能"
+                />
+              </div>
+              <button class="sort-dropdown" type="button" aria-label="排序">
+                <span>推荐</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <polyline
+                    points="6 9 12 15 18 9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
               </button>
+              <div class="view-toggle" role="tablist" aria-label="视图切换">
+                <button
+                  class="view-btn active"
+                  data-view="grid"
+                  role="tab"
+                  aria-selected="true"
+                  aria-label="网格视图"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                  </svg>
+                </button>
+                <button
+                  class="view-btn"
+                  data-view="list"
+                  role="tab"
+                  aria-selected="false"
+                  aria-label="列表视图"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <line x1="3" y1="6" x2="21" y2="6" stroke-linecap="round" />
+                    <line
+                      x1="3"
+                      y1="12"
+                      x2="21"
+                      y2="12"
+                      stroke-linecap="round"
+                    />
+                    <line
+                      x1="3"
+                      y1="18"
+                      x2="21"
+                      y2="18"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <div class="install-card-body" id="modalCommand">—</div>
           </div>
-        </section>
 
-        <section class="modal-section">
-          <div class="modal-links" id="modalLinks"></div>
-        </section>
+          <div class="skills-layout">
+            <aside class="sidebar" aria-label="类型筛选">
+              <div class="type-nav-label">类型</div>
+              <nav
+                class="type-nav"
+                data-filter="type"
+                role="tablist"
+                aria-label="按类型筛选"
+              >
+                <button
+                  class="type-nav-item active"
+                  data-value="skill"
+                  role="tab"
+                  aria-selected="true"
+                >
+                  <span class="type-nav-icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="18"
+                      height="18"
+                    >
+                      <path
+                        d="M14.7 6.3 17.4 9l2.3-2.3a2 2 0 0 0 0-2.8l-.6-.6a2 2 0 0 0-2.8 0Z"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M3 21 14.7 9.3l-2.7-2.7L3 18Z"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <span class="type-nav-text">Skill</span>
+                  <span class="type-nav-count" data-count="skill">—</span>
+                </button>
+                <button
+                  class="type-nav-item"
+                  data-value="plugin"
+                  role="tab"
+                  aria-selected="false"
+                >
+                  <span class="type-nav-icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="18"
+                      height="18"
+                    >
+                      <path
+                        d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"
+                        stroke-linecap="round"
+                      />
+                      <rect x="6" y="6" width="12" height="12" rx="2.5" />
+                    </svg>
+                  </span>
+                  <span class="type-nav-text">Plugin</span>
+                  <span class="type-nav-count" data-count="plugin">—</span>
+                </button>
+              </nav>
+            </aside>
+
+            <div class="skills-main">
+              <p class="results-count" id="skillCount">加载中...</p>
+              <div class="skill-grid" id="skillGrid" aria-live="polite"></div>
+              <div class="empty-state" id="emptyState" hidden>
+                <div class="empty-emoji">🔭</div>
+                <p>没有匹配的技能</p>
+                <button class="btn-secondary" id="clearSearch">清除筛选</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="site-footer-cta"></section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p class="footer-copy">© 2026 UII Agent Hub</p>
+        <div class="footer-links">
+          <a
+            href="https://github.com/ruanrrn/uii-agent-hub"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
+          >
+          <a
+            href="https://github.com/ruanrrn/uii-agent-hub/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Issues</a
+          >
+        </div>
+      </div>
+    </footer>
+
+    <div
+      class="modal-backdrop"
+      id="modalBackdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+      hidden
+    >
+      <div class="modal" id="modal" role="document">
+        <header class="modal-header">
+          <div class="modal-title-group">
+            <div class="modal-icon" id="modalIcon" aria-hidden="true">❤️</div>
+            <div>
+              <h3 class="modal-title" id="modalTitle">—</h3>
+              <div class="modal-sub" id="modalSub">—</div>
+            </div>
+          </div>
+          <button class="modal-close" id="modalClose" aria-label="关闭">
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <line x1="6" y1="6" x2="18" y2="18" stroke-linecap="round" />
+              <line x1="18" y1="6" x2="6" y2="18" stroke-linecap="round" />
+            </svg>
+          </button>
+        </header>
+
+        <div class="modal-body">
+          <section class="modal-section">
+            <p class="modal-desc" id="modalDesc">—</p>
+          </section>
+
+          <section class="modal-section">
+            <div class="modal-meta-grid" id="modalMetaGrid"></div>
+          </section>
+
+          <section class="modal-section">
+            <div class="modal-section-label">Quick Start</div>
+            <div class="install-card">
+              <div class="install-card-head">
+                <span class="install-card-intro"
+                  >复制下面这段话，粘贴给任一能读懂自然语言、可执行本地脚本的 AI
+                  助手</span
+                >
+                <button
+                  class="copy-btn-light"
+                  id="modalCopyBtn"
+                  aria-label="复制安装指令"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="13"
+                    height="13"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                    <path
+                      d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                    />
+                  </svg>
+                  <span class="copy-label">Copy</span>
+                </button>
+              </div>
+              <div class="install-card-body" id="modalCommand">—</div>
+            </div>
+          </section>
+
+          <section class="modal-section">
+            <div class="modal-links" id="modalLinks"></div>
+          </section>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script src="app.js?v=6" defer></script>
-</body>
+    <script src="app.js?v=6" defer></script>
+  </body>
 </html>

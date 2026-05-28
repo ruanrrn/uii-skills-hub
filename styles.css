@@ -73,6 +73,9 @@ body {
   background: var(--bg-page);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 a {
@@ -1076,6 +1079,9 @@ code {
 }
 
 /* ---------- Footer ---------- */
+main {
+  flex: 1;
+}
 .site-footer {
   padding: 14px 0;
   border-top: 1px solid var(--border-default);
