@@ -2,7 +2,7 @@
    Skill Hub — Models-style data + renderer
    ================================================================ */
 
-const REPO_URL = 'https://github.com/ruanrrn/uii-skills-hub';
+const REPO_URL = 'https://github.com/ruanrrn/uii-agents-hub';
 
 const SKILLS = [
   {
@@ -35,7 +35,7 @@ const SKILLS = [
     quickstart: [
       '请帮我安装 vitallens-rppg 这个 skill：',
       '',
-      '源码：https://github.com/ruanrrn/uii-skills-hub/tree/main/vitallens',
+      '源码：https://github.com/ruanrrn/uii-agents-hub/tree/main/vitallens',
       '请把它放到本地 skill 目录。',
       '',
       '依赖（任一缺失先告诉我怎么补）：',

@@ -2,7 +2,7 @@
 
 联影智能 Agent Hub — 把影像 AI 能力变成院内智能体可以直接调用的标准化外部服务。
 
-**在线预览**: https://ruanrrn.github.io/uii-skills-hub/
+**在线预览**: https://ruanrrn.github.io/uii-agents-hub/
 
 ## 项目结构
 
